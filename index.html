@@ -1,1 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>misery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* CUSTOMIZATION VARIABLES - EDIT THESE TO CHANGE APPEARANCE */
+            --main-color: white;
+            --secondary-color: rgba(255,255,255,0.7);
+            --overlay-opacity: 0.6;
+            --social-btn-hover: rgba(255,255,255,0.3);
+            --social-btn-active: rgba(255,255,255,0.4);
+            --click-prompt-size: 2.2rem;
+            --title-size: 3rem;
+            --social-btn-size: 90px;
+            --social-btn-radius: 10px;
+            --views-color: rgba(255,255,255,0.7);
+            --transition-speed: 0.5s;
+            --font-family: 'Poppins', sans-serif;
+            --blur-amount: 10px;
+            --title-position: 6%;
+            --social-buttons-position: 670px;
+            --view-counter-position: 30px;
+			--gap: 2px;
+        }
 
+        body {
+            margin: 0;
+            padding: 0;
+            background: rgba(0, 0, 0, var(--overlay-opacity));
+            cursor: pointer;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: var(--font-family);
+        }
+
+        .click-prompt, .title {
+            font-weight: 600;
+            color: var(--main-color);
+            z-index: 3;
+            text-align: center;
+            opacity: 1;
+            transition: all var(--transition-speed) cubic-bezier(0.33, 1, 0.68, 1);
+        }
+
+        .click-prompt {
+            font-size: var(--click-prompt-size);
+            padding: 16px 24px;
+            letter-spacing: 0.1em;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            text-transform: lowercase;
+        }
+
+        .title {
+            font-size: var(--title-size);
+            opacity: 0;
+            transition: opacity var(--transition-speed) cubic-bezier(0.33, 1, 0.68, 1) 0s;
+            position: absolute;
+            top: var(--title-position);
+            width: 100%;
+            letter-spacing: -0.02em;
+            z-index: 2;
+            text-transform: lowercase;
+        }
+
+        .click-prompt.fade-out {
+            opacity: 0;
+            transform: translateY(-60%);
+        }
+
+        .title.fade-in {
+            opacity: 1;
+        }
+
+        #bgVideo {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, var(--overlay-opacity));
+            z-index: 2;
+            transition: none;
+        }
+        body.clicked .overlay {
+            display: none;
+        }
+
+        /* Social Media Buttons */
+        .social-buttons {
+            position: absolute;
+            bottom: var(--social-buttons-position);
+            display: none;
+            z-index: 4;
+            gap: 2px;
+        }
+        body.clicked .social-buttons {
+            display: flex;
+            animation: fadeInUp 0.8s ease-out 0.5s both;
+        }
+        .social-btn {
+            width: var(--social-btn-size);
+            height: var(--social-btn-size);
+            background: var(--social-btn-color);
+            backdrop-filter: blur(var(--blur-amount));
+            border-radius: var(--social-btn-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--main-color);
+            font-size: calc(var(--social-btn-size) * 0.48);
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .social-btn:hover {
+            background: var(--social-btn-hover);
+            transform: translateY(-3px);
+        }
+        .social-btn:active {
+            background: var(--social-btn-active);
+            transform: translateY(0);
+        }
+
+        /* View Counter with Eye */
+        .view-counter {
+            position: absolute;
+            bottom: var(--view-counter-position);
+            right: var(--view-counter-position);
+            color: var(--views-color);
+            font-size: 1.3rem;
+            z-index: 5;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+        body.clicked .view-counter {
+            display: flex;
+            animation: fadeIn 1s ease-out 1s both;
+        }
+        .eye-icon {
+            animation: blink 4s infinite;
+        }
+
+        /* Customization Panel */
+        .customization-panel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 100;
+            color: white;
+            font-family: sans-serif;
+            max-width: 300px;
+            display: none;
+        }
+        .customization-panel h3 {
+            margin-top: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 8px;
+        }
+        .customization-panel label {
+            display: block;
+            margin: 10px 0 5px;
+            font-size: 0.9rem;
+        }
+        .customization-panel input[type="range"],
+        .customization-panel input[type="color"],
+        .customization-panel select {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .toggle-panel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            font-size: 1.2rem;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes blink {
+            0%, 45%, 55%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <div class="click-prompt">click me</div>
+    <div class="title">misery</div>
+    
+    <!-- Social Media Buttons -->
+    <div class="social-buttons">
+        <a href="https://instagram.com/handreveal" target="_blank" class="social-btn">
+            <i class="fab fa-instagram"></i>
+        </a>
+        <a href="https://discord.com/users/1340370783515578520" target="_blank" class="social-btn">
+            <i class="fab fa-discord"></i>
+        </a>
+        <a href="https://t.me/survive" target="_blank" class="social-btn">
+            <i class="fab fa-telegram"></i>
+        </a>
+    </div>
+
+    <!-- View Counter with Eye -->
+    <div class="view-counter">
+        <i class="fas fa-eye eye-icon"></i>
+        <span id="viewCount">0</span> views
+		
+		
+    </div>
+
+    <!-- Customization Controls -->
+    <div class="customization-panel" id="customPanel">
+    </div>
+
+    <video id="bgVideo" loop muted preload="auto">
+        <source src="file:///C:/Users/tande/Downloads/ssstik.io_@sew.fae_1754978495988.mp4" type="video/mp4">
+    </video>
+    
+    <audio id="bgMusic" loop>
+        <source src="file:///C:/Users/tande/Downloads/SpotiDownloader.com%20-%20Swimming%20-%20Flawed%20Mangoes.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Configuration
+        const config = {
+            initialVolume: 0.5,
+            viewCounter: {
+                enabled: true,
+                storageKey: 'misery_views',
+                currentViews: 0
+            },
+            settingsKey: 'misery_settings'
+        };
+
+        // DOM Elements
+        const audio = document.getElementById('bgMusic');
+        const video = document.getElementById('bgVideo');
+        const prompt = document.querySelector('.click-prompt');
+        const title = document.querySelector('.title');
+        const body = document.body;
+        const overlay = document.querySelector('.overlay');
+        const viewCountEl = document.getElementById('viewCount');
+        const panelToggle = document.getElementById('panelToggle');
+        const customPanel = document.getElementById('customPanel');
+        
+        // Customization controls
+        const mainColor = document.getElementById('mainColor');
+        const overlayOpacity = document.getElementById('overlayOpacity');
+        const socialBtnSize = document.getElementById('socialBtnSize');
+        const socialBtnRadius = document.getElementById('socialBtnRadius');
+        const titleSize = document.getElementById('titleSize');
+        const clickPromptSize = document.getElementById('clickPromptSize');
+        const blurAmount = document.getElementById('blurAmount');
+        const transitionSpeed = document.getElementById('transitionSpeed');
+        const resetSettings = document.getElementById('resetSettings');
+        const saveSettings = document.getElementById('saveSettings');
+
+        // Initialize
+        audio.volume = config.initialVolume;
+        video.load();
+
+        // View Counter System
+        if (config.viewCounter.enabled) {
+            const storedViews = localStorage.getItem(config.viewCounter.storageKey);
+            config.viewCounter.currentViews = storedViews ? parseInt(storedViews) : 0;
+            
+            config.viewCounter.currentViews++;
+            localStorage.setItem(config.viewCounter.storageKey, config.viewCounter.currentViews);
+            viewCountEl.textContent = config.viewCounter.currentViews.toLocaleString();
+        }
+
+        // Click Handler
+        document.body.addEventListener('click', (e) => {
+            if (!e.target.closest('.social-btn') && !e.target.closest('.customization-panel') && e.target !== panelToggle) {
+                video.play().catch(e => console.log("Video playback failed:", e));
+                audio.play().catch(e => console.log("Audio playback failed:", e));
+                
+                body.classList.add('clicked');
+                prompt.classList.add('fade-out');
+                
+                setTimeout(() => title.classList.add('fade-in'), 300);
+            }
+        }, { once: true });
+
+        // Customization Panel Functions
+        panelToggle.addEventListener('click', () => {
+            customPanel.style.display = customPanel.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Load saved settings
+        function loadSettings() {
+            const savedSettings = localStorage.getItem(config.settingsKey);
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                
+                // Apply settings to controls
+                mainColor.value = settings.mainColor || '#ffffff';
+                overlayOpacity.value = settings.overlayOpacity || 0.6;
+                socialBtnSize.value = settings.socialBtnSize || 50;
+                socialBtnRadius.value = settings.socialBtnRadius || 10;
+                titleSize.value = settings.titleSize || 3;
+                clickPromptSize.value = settings.clickPromptSize || 2.2;
+                blurAmount.value = settings.blurAmount || 10;
+                transitionSpeed.value = settings.transitionSpeed || 0.5;
+                
+                // Apply settings to CSS variables
+                updateCSSVariables(settings);
+            }
+        }
+
+        // Update CSS variables based on settings
+        function updateCSSVariables(settings) {
+            const root = document.documentElement;
+            
+            if (settings.mainColor) root.style.setProperty('--main-color', settings.mainColor);
+            if (settings.overlayOpacity) root.style.setProperty('--overlay-opacity', settings.overlayOpacity);
+            if (settings.socialBtnSize) root.style.setProperty('--social-btn-size', settings.socialBtnSize + 'px');
+            if (settings.socialBtnRadius) root.style.setProperty('--social-btn-radius', settings.socialBtnRadius + 'px');
+            if (settings.titleSize) root.style.setProperty('--title-size', settings.titleSize + 'rem');
+            if (settings.clickPromptSize) root.style.setProperty('--click-prompt-size', settings.clickPromptSize + 'rem');
+            if (settings.blurAmount) root.style.setProperty('--blur-amount', settings.blurAmount + 'px');
+            if (settings.transitionSpeed) root.style.setProperty('--transition-speed', settings.transitionSpeed + 's');
+        }
+
+        // Save settings
+        function saveCurrentSettings() {
+            const settings = {
+                mainColor: mainColor.value,
+                overlayOpacity: overlayOpacity.value,
+                socialBtnSize: socialBtnSize.value,
+                socialBtnRadius: socialBtnRadius.value,
+                titleSize: titleSize.value,
+                clickPromptSize: clickPromptSize.value,
+                blurAmount: blurAmount.value,
+                transitionSpeed: transitionSpeed.value
+            };
+            
+            localStorage.setItem(config.settingsKey, JSON.stringify(settings));
+            alert('Settings saved! They will be applied next time you load the page.');
+        }
+
+        // Reset to default
+        function resetToDefault() {
+            localStorage.removeItem(config.settingsKey);
+            
+            // Reset control values
+            mainColor.value = '#ffffff';
+            overlayOpacity.value = 0.6;
+            socialBtnSize.value = 50;
+            socialBtnRadius.value = 10;
+            titleSize.value = 3;
+            clickPromptSize.value = 2.2;
+            blurAmount.value = 10;
+            transitionSpeed.value = 0.5;
+            
+            // Reset CSS variables
+            const root = document.documentElement;
+            root.style.removeProperty('--main-color');
+            root.style.removeProperty('--overlay-opacity');
+            root.style.removeProperty('--social-btn-size');
+            root.style.removeProperty('--social-btn-radius');
+            root.style.removeProperty('--title-size');
+            root.style.removeProperty('--click-prompt-size');
+            root.style.removeProperty('--blur-amount');
+            root.style.removeProperty('--transition-speed');
+            
+            alert('Settings reset to default! Refresh the page to see changes.');
+        }
+
+        // Event listeners for real-time preview
+        mainColor.addEventListener('input', () => {
+            document.documentElement.style.setProperty('--main-color', mainColor.value);
+            document.documentElement.style.setProperty('--secondary-color', mainColor.value + 'b3');
+            document.documentElement.style.setProperty('--views-color', mainColor.value + 'b3');
+            document.documentElement.style.setProperty('--social-btn-color', mainColor.value.replace(')', ', 0.2)').replace('rgb', 'rgba'));
+            document.documentElement.style.setProperty('--social-btn-hover', mainColor.value.replace(')', ', 0.3)').replace('rgb', 'rgba'));
+            document.documentElement.style.setProperty('--social-btn-active', mainColor.value.replace(')', ', 0.4)').replace('rgb', 'rgba'));
+        });
+
+        overlayOpacity.addEventListener('input', () => {
+            document.documentElement.style.setProperty('--overlay-opacity', overlayOpacity.value);
+        });
+
+        socialBtnSize.addEventListener('input', () => {
+            document.documentElement.style.setProperty('--social-btn-size', socialBtnSize.value + 'px');
+        });
+
+        socialBtnRadius.addEventListener('input', () => {
+            document.documentElement.style.setProperty('--social-btn-radius', socialBtnRadius.value + 'px');
+        });
+
+        titleSize.addEventListener('input', () => {
+            document.documentElement.style.setProperty('--title-size', titleSize.value + 'rem');
+        });
+
+        clickPromptSize.addEventListener('input', () => {
+            document.documentElement.style.setProperty('--click-prompt-size', clickPromptSize.value + 'rem');
+        });
+
+        blurAmount.addEventListener('input', () => {
+            document.documentElement.style.setProperty('--blur-amount', blurAmount.value + 'px');
+        });
+
+        transitionSpeed.addEventListener('input', () => {
+            document.documentElement.style.setProperty('--transition-speed', transitionSpeed.value + 's');
+        });
+
+        saveSettings.addEventListener('click', saveCurrentSettings);
+        resetSettings.addEventListener('click', resetToDefault);
+
+        // Load settings when page loads
+        window.addEventListener('DOMContentLoaded', loadSettings);
+    </script>
+</body>
+</html>
