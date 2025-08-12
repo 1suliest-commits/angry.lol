@@ -256,17 +256,19 @@
         <source src="https://cdn.discordapp.com/attachments/1404526919260569804/1404709029069979708/SpotiDownloader.com_-_Swimming_-_Flawed_Mangoes_1.mp3?ex=689c2cba&is=689adb3a&hm=03aefc018e7fc1ad89ee07c2d055d40cd5901e0ab8a523f01f8719826aaeb4f3">
     </audio>
 
-    <script>
-        // Configuration
-        const config = {
-            initialVolume: 0.5,
-            viewCounter: {
-                enabled: true,
-                storageKey: 'misery_views',
-                currentViews: 0
-            },
-            settingsKey: 'misery_settings'
-        };
+<button id="panelToggle" class="toggle-panel">⚙</button>
+
+<script>
+const config = {
+    initialVolume: 0.5, // fixed decimal
+    viewCounter: {
+        enabled: true,
+        storageKey: 'misery_views',
+        currentViews: 0
+    },
+    settingsKey: 'misery_settings'
+};
+
 
         // DOM Elements
         const audio = document.getElementById('bgMusic');
@@ -450,6 +452,7 @@
 </body>
 
 </html>
+
 
 
 
